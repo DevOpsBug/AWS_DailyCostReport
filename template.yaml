@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AWS_DailyCostReport
+
+  Sample SAM Template for AWS_DailyCostReport
+
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+
+Resources:
+  CostReportFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: lambda/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+
+Outputs:
+  CostReportFunction:
+    Description: "Cost Report Lambda Function ARN"
+    Value: !GetAtt CostReportFunction.Arn
+  CostReportFunctionIamRole:
+    Description: "Implicit IAM Role created for Cost Report function"
+    Value: !GetAtt CostReportFunctionRole.Arn
