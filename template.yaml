@@ -10,15 +10,41 @@ Globals:
     Timeout: 3
     MemorySize: 128
 
+Parameters:
+  EmailAddress:
+    NoEcho: true
+    Description: E-Mail Address for SNS Subscription
+    Type: String
+
 Resources:
+  CostReportSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: DailyCostReport
+      Subscription:
+        - Endpoint: !Ref EmailAddress
+          Protocol: email
+
   CostReportFunction:
     Type: AWS::Serverless::Function 
     Properties:
+      FunctionName: CostReportFunction
       CodeUri: lambda/
       Handler: app.lambda_handler
       Runtime: python3.9
       Architectures:
         - x86_64
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ce:GetCostAndUsage
+              Resource: "*"
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt CostReportSNSTopic.TopicName
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref CostReportSNSTopic
 
 Outputs:
   CostReportFunction:

@@ -1,15 +1,19 @@
 import boto3
 import os
+import json
 from datetime import datetime
 
 def lambda_handler(event, context):
-    client = boto3.client('ce')
+    ce_client = boto3.client('ce')
+    sns_client = boto3.client('sns')
+    topic_arn = os.environ['SNS_TOPIC_ARN']
+    print("Topic ARN: " + topic_arn)
     
     # Get first day of current month and today's date
     end_date = datetime.now().date()        #current date
     start_date = end_date.replace(day=1)    #first day of the month
     
-    response = client.get_cost_and_usage(
+    response = ce_client.get_cost_and_usage(
         TimePeriod={
             'Start': start_date.strftime('%Y-%m-%d'),
             'End': end_date.strftime('%Y-%m-%d')
@@ -43,13 +47,25 @@ def lambda_handler(event, context):
     # Sort services by cost (highest to lowest)
     cost_data.sort(key=lambda x: float(x['Cost']), reverse=True)
     
-    return {
-        'statusCode': 200,
-        'body': {
+    message = {
             'startDate': start_date.strftime('%Y-%m-%d'),
             'endDate': end_date.strftime('%Y-%m-%d'),
             'totalCost': f"{total_cost:.2f}",
             'costs': cost_data,
             'currency': unit    # Currency unit
         }
+    
+    response = sns_client.publish(
+        TopicArn=topic_arn,
+        Message=json.dumps(message),
+        Subject='AWS Daily Cost Report'
+    )
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps({
+            'message': 'Cost report sent successfully!',
+            'sns_response': response,
+            
+        })
     }
