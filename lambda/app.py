@@ -7,7 +7,6 @@ def lambda_handler(event, context):
     ce_client = boto3.client('ce')
     sns_client = boto3.client('sns')
     topic_arn = os.environ['SNS_TOPIC_ARN']
-    print("Topic ARN: " + topic_arn)
     
     # Get first day of current month and today's date
     end_date = datetime.now().date()        #current date
