@@ -45,6 +45,11 @@ Resources:
       Environment:
         Variables:
           SNS_TOPIC_ARN: !Ref CostReportSNSTopic
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 19 * * ? *)
 
 Outputs:
   CostReportFunction:
