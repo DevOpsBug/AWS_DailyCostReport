@@ -56,7 +56,7 @@ def lambda_handler(event, context):
     
     response = sns_client.publish(
         TopicArn=topic_arn,
-        Message=json.dumps(message),
+        Message=json.dumps(message, indent=2),  # Prettified JSON
         Subject='AWS Daily Cost Report'
     )
     
